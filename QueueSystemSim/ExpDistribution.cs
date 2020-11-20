@@ -38,7 +38,6 @@ namespace QueueSystemSim
         ~ExpDistribution()
         {
             RNG.Dispose();
-            Console.WriteLine("RNG Disposed");
         }
     }
 }

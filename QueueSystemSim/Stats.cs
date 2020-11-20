@@ -40,7 +40,7 @@ namespace QueueSystemSim
             get => nClientsWaitingSum / nMeasurements;
         }
 
-        public void AddEntry(double waitInterval, double systemPassInterval, double nClientsInSystem, double nClientsWaiting)
+        public void AddEntry(double waitInterval=0, double systemPassInterval=0, double nClientsInSystem=0, double nClientsWaiting=0)
         { 
             nClientsInSystemSum += nClientsInSystem;
             servicePassIntervalSum += systemPassInterval;

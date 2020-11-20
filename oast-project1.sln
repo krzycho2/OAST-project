@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueueSystemSim", "QueueSyst
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueueSystemSimTests", "QueueSystemSimTests\QueueSystemSimTests.csproj", "{3CB29E83-260B-4466-B24D-9DD9AA3DC184}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueueSystemSimTests1", "QueueSystemSimTests1\QueueSystemSimTests1.csproj", "{299EF90C-C486-4B99-8D99-7A10C77484C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{3CB29E83-260B-4466-B24D-9DD9AA3DC184}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CB29E83-260B-4466-B24D-9DD9AA3DC184}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CB29E83-260B-4466-B24D-9DD9AA3DC184}.Release|Any CPU.Build.0 = Release|Any CPU
+		{299EF90C-C486-4B99-8D99-7A10C77484C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{299EF90C-C486-4B99-8D99-7A10C77484C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{299EF90C-C486-4B99-8D99-7A10C77484C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{299EF90C-C486-4B99-8D99-7A10C77484C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

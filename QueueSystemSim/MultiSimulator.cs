@@ -30,10 +30,10 @@ namespace QueueSystemSim
 
         private void CollectStats()
         {
-            double en = EventSimulator.QueueSystem.Stats.EN;
-            double et = EventSimulator.QueueSystem.Stats.ET;
-            double ew = EventSimulator.QueueSystem.Stats.EW;
-            double eq = EventSimulator.QueueSystem.Stats.EQ;
+            double en = EventSimulator.EN;
+            double et = EventSimulator.ET;
+            double ew = EventSimulator.EW;
+            double eq = EventSimulator.EQ;
 
             GlobalStats.AddEntry(ew, et, en, eq);
 

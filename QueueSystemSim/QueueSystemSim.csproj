@@ -56,12 +56,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Client.cs" />
-    <Compile Include="Episode.cs" />
-    <Compile Include="EpisodePool.cs" />
-    <Compile Include="EpisodeType.cs" />
+    <Compile Include="QEvent.cs" />
+    <Compile Include="EventPool.cs" />
+    <Compile Include="QEventType.cs" />
     <Compile Include="EventSimulator.cs" />
     <Compile Include="ExpDistribution.cs" />
-    <Compile Include="Mm1ContinuousService.cs" />
     <Compile Include="Mm1QueueSystem.cs" />
     <Compile Include="MultiSimulator.cs" />
     <Compile Include="MultiStats.cs" />

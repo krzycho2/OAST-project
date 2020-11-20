@@ -10,16 +10,19 @@ namespace QueueSystemSim
     {
         private ExpDistribution expDistribution = new ExpDistribution();
 
-        public EpisodePool EpisodePool { get; private set; } = new EpisodePool();
+        public EventPool EventPool { get; private set; } = new EventPool();
         public Mm1QueueSystem QueueSystem { get; private set; }
-
-        public int nSteps { get; private set; }
 
         public int nWarmupSteps { get; set; } = 500;
         public int nInitClients { get; set; } = 5;
         public int nInitEpisodes { get; set; } = 2;
-
+        public int nSteps { get; set; }
         public double SimStopByET { get => 1e-7 * QueueSystem.LeaveParamMi; }
+
+        public double EN { get => CalculateEN(); }
+        public double EQ { get => CalculateEQ(); }
+        public double ET { get => QueueSystem.TimeStats.ET; }
+        public double EW { get => QueueSystem.TimeStats.EW; }
 
         public EventSimulator (Mm1QueueSystem queueSystem) // Dependency Injection
         {
@@ -44,7 +47,7 @@ namespace QueueSystemSim
             for (int i = 0; i < nWarmupSteps; i++)
                 SimStep();
 
-            QueueSystem.Stats.Reset();
+            QueueSystem.TimeStats.Reset();
         }
 
         public void ActualSim()
@@ -56,50 +59,87 @@ namespace QueueSystemSim
             {
                 SimStep();
                 nSteps++;
-                deltaET = Math.Abs(QueueSystem.Stats.ET - lastET);
-                lastET = QueueSystem.Stats.ET;
+                deltaET = Math.Abs(QueueSystem.TimeStats.ET - lastET);
+                lastET = QueueSystem.TimeStats.ET;
             }
         }
 
         public void SimStep() 
         {
             // GET
-            AddEpisodeToQueue();
+            AddEventToQueue();
 
             // EXECUTE
             QueueSystem.ServiceStep();
+            CollectResults();
 
             // PUT
             PutArrivalEpisodeOnPool();
         }
 
-        private void AddEpisodeToQueue()
+        private void CollectResults()
         {
-            var episode = EpisodePool.GET();
-            if (episode.Type == EpisodeType.Arrival)
+            EventPool.AddOldEvents(QueueSystem.LastEvents);
+        }
+
+        private void AddEventToQueue()
+        {
+            var episode = EventPool.GET();
+            if (episode.Type == QEventType.Arrival)
             {
-                var client = new Client { ArrivalTime = episode.Time };
+                var client = new Client { Arrival = episode };
                 QueueSystem.AddClient(client);
             }
         }
 
         private void PutArrivalEpisodeOnPool()
         {
-            var queueLastArrival = QueueSystem.Clients.Last().ArrivalTime;
+            var queueLastArrival = QueueSystem.Clients.Last().Arrival.Time;
             double newArrivalTime = queueLastArrival + expDistribution.CreateNumber(QueueSystem.ArrivalParamLambda);
 
-            EpisodePool.PUT(EpisodeType.Arrival, newArrivalTime);
+            EventPool.PUT(QEventType.Arrival, newArrivalTime);
         }
 
         public void InitEpisodes()
         {
-            EpisodePool = new EpisodePool();
+            EventPool = new EventPool();
             PutArrivalEpisodeOnPool();
         }
 
-        public void Reset()
+        private double CalculateEN()
         {
+            return CountClients(QEventType.Leave);
+        }
 
+        private double CalculateEQ()
+        {
+            return CountClients(QEventType.ServiceStart);
+        }
+
+        private double CountClients(QEventType type)
+        {
+            var events = EventPool.OldEvents.
+                Where((qEvent) => qEvent.Type == QEventType.Arrival || qEvent.Type == type). // Filter Arrival and given events
+                OrderBy((qEvent) => qEvent.Time). // Sort by time
+                ToList();
+
+            double interval = events.Last().Time - events.First().Time;
+            double sum = 0;
+            int tempNClients = 0;
+            for (int i = 0; i < events.Count() - 1; i++)
+            {
+                var qEvent = events[i];
+                if (qEvent.Type == QEventType.Arrival)
+                    tempNClients++;
+
+                else
+                    tempNClients--;
+
+                double intervalBetweenEvents = events[i + 1].Time - events[i].Time;
+                sum += (tempNClients * intervalBetweenEvents);
+            }
+
+            return sum / interval;
         }
 
     }

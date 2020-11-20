@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace QueueSystemSim
 {
-    public enum EpisodeType
+    public enum QEventType
     {
         Arrival,
-        Service,
+        ServiceStart,
         Leave
     }
 }

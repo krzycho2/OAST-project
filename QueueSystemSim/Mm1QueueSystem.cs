@@ -9,24 +9,27 @@ namespace QueueSystemSim
     public class Mm1QueueSystem
     {
         protected readonly ExpDistribution expDistribution = new ExpDistribution();
-        
-        public double ActualTime { get; protected set; }
-        public double LeaveParamMi { get; set; }
 
+        public double ActualTime { get; protected set; }
+
+        public double LeaveParamMi { get; set; }
         public double ArrivalParamLambda { get; set; }
         public double QueueParamRo { get => ArrivalParamLambda / LeaveParamMi; }
         
         public List<Client> Clients { get; protected set; } = new List<Client>();
-        public Stats Stats { get; private set; } = new Stats();
+        public Stats TimeStats { get; private set; } = new Stats();
+        public List<QEvent> LastEvents { get; private set; } = new List<QEvent>();
 
-        public virtual double ExpectedEQ { get => Math.Pow(QueueParamRo, 2.0) / (1 - QueueParamRo); }
-        public virtual double ExpectedEN { get => QueueParamRo / (1 - QueueParamRo); }
-        public virtual double ExpectedEW { get => QueueParamRo / (LeaveParamMi - ArrivalParamLambda); }
-        public virtual double ExpectedET { get => 1 / (LeaveParamMi - ArrivalParamLambda); }
+        public bool IsContinuous { get; set; } = false;
+
+        public double ExpectedEQ { get => IsContinuous? QueueParamRo / (1 - QueueParamRo) : Math.Pow(QueueParamRo, 2.0) / (1 - QueueParamRo); }
+        public double ExpectedEN { get => IsContinuous? (2 - QueueParamRo) * QueueParamRo / (1 - QueueParamRo) : QueueParamRo / (1 - QueueParamRo); }
+        public double ExpectedEW { get => IsContinuous? QueueParamRo / ArrivalParamLambda / (1 - QueueParamRo) : QueueParamRo / (LeaveParamMi - ArrivalParamLambda); }
+        public double ExpectedET { get => IsContinuous? (2 - QueueParamRo) * QueueParamRo / ArrivalParamLambda / (1 - QueueParamRo) : 1 / (LeaveParamMi - ArrivalParamLambda); }
 
         public int nClientsInSystem
         {
-            get => Clients.Where(c => c.ArrivalTime <= ActualTime ).Count();
+            get => Clients.Where(c => c.Arrival.Time <= ActualTime ).Count();
         }
 
         public int nClientsWaiting 
@@ -54,10 +57,7 @@ namespace QueueSystemSim
         public Client CurrentClient 
         {
             get => Clients[0];
-            set
-            {
-                Clients[0] = value;
-            }
+            set => Clients[0] = value;
         }
 
         public Mm1QueueSystem(double paramMi, double paramLambda)
@@ -68,9 +68,14 @@ namespace QueueSystemSim
 
         public virtual void ServiceStep()
         {
-            if (nClientsWaiting == 0)
-                ActualTime = CurrentClient.ArrivalTime; // Skip time
+            while (nClientsWaiting == 0)
+            {
+                if (IsContinuous)
+                    ServiceImaginaryClient();
 
+                else
+                    ActualTime = CurrentClient.Arrival.Time; // Skip timebv 
+            }
             ServiceClient();
         }
 
@@ -81,14 +86,14 @@ namespace QueueSystemSim
 
         protected void ServiceClient() 
         {
-            CurrentClient.ServiceStartTime = ActualTime;
+            CurrentClient.ServiceStart.Time = ActualTime;
 
             double serviceInterval = expDistribution.CreateNumber(LeaveParamMi);
-            CurrentClient.LeaveTime = CurrentClient.ServiceStartTime + serviceInterval;
+            CurrentClient.Leave.Time = CurrentClient.ServiceStart.Time + serviceInterval;
 
-            ActualTime = CurrentClient.LeaveTime;
+            ActualTime = CurrentClient.Leave.Time;
 
-            Stats.AddEntry(CurrentClient.WaitForServiceTime, CurrentClient.SystemPassInterval, nClientsInSystem, nClientsWaiting);
+            CollectResults();
 
             Clients.RemoveAt(0);
         }
@@ -100,11 +105,24 @@ namespace QueueSystemSim
             for (int i = 0; i < nInitClients; i++)
             {
                 time += expDistribution.CreateNumber(ArrivalParamLambda);
-                var client = new Client { ArrivalTime = time };
-                AddClient(client);
+                AddClient( new Client(time) );
             }
+            ActualTime = CurrentClient.Arrival.Time;
+        }
+        
+        public void CollectResults()
+        {
+            LastEvents = CurrentClient.AllEvents;
+            TimeStats.AddEntry(CurrentClient.WaitInterval, CurrentClient.SystemPassInterval);
+        }
 
-            ActualTime = Clients[0].ArrivalTime;
+        private void ServiceImaginaryClient()
+        {
+            var imClient = new Client(ActualTime, ActualTime);
+            double serviceInterval = expDistribution.CreateNumber(LeaveParamMi);
+            imClient.Leave.Time = imClient.ServiceStart.Time + serviceInterval; // Unnessary, just to show logic
+
+            ActualTime = imClient.Leave.Time;
         }
     }
 }

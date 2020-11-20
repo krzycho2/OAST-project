@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace QueueSystemSim
 {
-    public class Episode
+    public class QEvent
     {
-        public EpisodeType Type { get; set; }
+        public QEventType Type { get; set; }
         public double Time { get; set; }
     }
 }

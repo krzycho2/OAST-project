@@ -8,16 +8,28 @@ namespace QueueSystemSim
 {
     public class Client
     {
-        public double ArrivalTime { get; set; }
-        public double ServiceStartTime { get; set; } = -1;
-        public double LeaveTime { get; set; }
+        public QEvent Arrival { get; set; } 
+        public QEvent ServiceStart { get; set; }
+        public QEvent Leave { get; set; }
+        public List<QEvent> AllEvents { get => new List<QEvent> { Arrival, ServiceStart, Leave }; }
 
         // getters
-        public double WaitForServiceTime { get => Math.Abs(ServiceStartTime - ArrivalTime); }
+        public double WaitInterval { get => Math.Abs(ServiceStart.Time - Arrival.Time); }
 
-        public double SystemPassInterval { get => Math.Abs(LeaveTime - ArrivalTime); }
+        public double SystemPassInterval { get => Math.Abs(Leave.Time - Arrival.Time); }
 
-        public bool ServiceStarted { get => ServiceStartTime != -1; }
+        public bool ServiceStarted { get => ServiceStart.Time != -1; }
 
+        public Client (double arrivalTime = -1, double serviceStartTime = -1, double leaveTime = -1)
+        {
+            Arrival = new QEvent { Type = QEventType.Arrival, Time = arrivalTime };
+            ServiceStart = new QEvent { Type = QEventType.ServiceStart, Time = serviceStartTime };
+            Leave = new QEvent { Type = QEventType.Leave, Time = leaveTime };
+        }
+
+        public void Test()
+        {
+
+        }
     }
 }
