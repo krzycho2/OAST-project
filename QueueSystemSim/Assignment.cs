@@ -14,6 +14,7 @@ namespace QueueSystemSim
         {
             Task1();
             Task2();
+            Task3();
         }
 
         /// <summary>
@@ -65,7 +66,7 @@ namespace QueueSystemSim
                 double paramRo = roValues[i];
                 double paramMi = paramLambda / paramRo;
 
-                var queueSystem = new Mm1QueueSystem(paramMi, paramLambda);
+                var queueSystem = new Mm1Continuous(paramMi, paramLambda);
 
                 var simulator = new MultiSimulator(queueSystem);
                 simulator.RunSim();
@@ -85,7 +86,37 @@ namespace QueueSystemSim
 
         public void Task3()
         {
+            var ET = new QOutputParam { Name = "ET" };
+            var EW = new QOutputParam { Name = "EW" };
+            var EN = new QOutputParam { Name = "EN" };
+            var EQ = new QOutputParam { Name = "EQ" };
+            var outputParams = new List<QOutputParam> { ET, EW, EN, EQ };
 
+            double[] roValues = new double[] { 0.25, 0.5, 0.75 };
+            double paramLambda = 4;
+
+            for (int i = 0; i < roValues.Length; i++)
+            {
+                double paramRo = roValues[i];
+                double paramMi = paramLambda / paramRo;
+
+                var queueSystem = new Mm1Continuous(paramMi, paramLambda);
+                queueSystem.IsFixedServiceInterval = true;
+                var simulator = new MultiSimulator(queueSystem);
+
+                simulator.RunSim();
+
+                foreach (var paramName in new string[] { "ET", "EW", "EN", "EQ" })
+                {
+                    outputParams.Find(param => param.Name == paramName).
+                    Values.Add(new QOutputParamValue { Ro = paramRo, Expected = queueSystem.ExpectedET, Value = simulator.GlobalStats.ET });
+                }
+            }
+
+            string output = Task3Intro;
+            output += PrettyPrint2(outputParams);
+            Console.Write(output);
+            AllOutput += output;
         }
 
         private string PrettyPrint2(List<QOutputParam> outputParams)
@@ -167,9 +198,7 @@ namespace QueueSystemSim
             get
             {
                 string output = "\n";
-                output += "1. Symulacja kolejki M/M/1\n";
-                output += "a) porównanie E[T] z wynikami teoretycznymi dla Ro = [0.25, 0.5, 0,75],\n";
-                output += "b) narysowanie wykresu zbieżności prawdopodobieństwa p0(t) do wartości p0 z rozkładu stacjonarnego.\n\n";
+                output += "3. Symulacja kolejki M/M/1 o pracy ciągłej i stałym czasie obsługi.\n";
                 return output;
             }
         }

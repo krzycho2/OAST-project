@@ -27,16 +27,7 @@ namespace QueueSystemSim
 
         private void OnStart(object sender, RoutedEventArgs e)
         {
-            var assignemnet = new Assignment
-            {
-                Do1_1 = (bool)C1.IsChecked,
-                Do1_2 = (bool)C2.IsChecked,
-                Do2_1 = (bool)C3.IsChecked,
-                Do2_2 = (bool)C4.IsChecked,
-                Do2_3 = (bool)C5.IsChecked,
-                OutputToFile = (bool)C6.IsChecked,
-            };
-
+            var assignemnet = new Assignment();
             assignemnet.Run();
         }
 
