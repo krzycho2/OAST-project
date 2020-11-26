@@ -25,36 +25,21 @@ namespace QueueSystemSim
             InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void OnStart(object sender, RoutedEventArgs e)
         {
-            double[] roValues = new double[] { 0.25, 0.5, 0.75 }; 
-            double paramLambda = 4; 
-
-            for (int i = 0; i < roValues.Length; i++)
+            var assignemnet = new Assignment
             {
-                double paramRo = roValues[i];
-                double paramMi = paramLambda / paramRo;
+                Do1_1 = (bool)C1.IsChecked,
+                Do1_2 = (bool)C2.IsChecked,
+                Do2_1 = (bool)C3.IsChecked,
+                Do2_2 = (bool)C4.IsChecked,
+                Do2_3 = (bool)C5.IsChecked,
+                OutputToFile = (bool)C6.IsChecked,
+            };
 
-                var queueSystem = new Mm1QueueSystem(paramMi, paramLambda);
-                queueSystem.IsContinuous = true;
-
-                var simulator = new MultiSimulator(queueSystem);
-                simulator.RunSim();
-
-                Console.WriteLine("Symulacja dla Ro := " + paramRo);
-                Console.WriteLine($"Lambda: {paramLambda}, Mi: {paramMi}");
-                Console.WriteLine($"ET: oczekiwane: {queueSystem.ExpectedET}, doświadczalne: {simulator.GlobalStats.ET}, błąd: {error(queueSystem.ExpectedET, simulator.GlobalStats.ET)}");
-                Console.WriteLine($"EN: oczekiwane: {queueSystem.ExpectedEN}, doświadczalne: {simulator.GlobalStats.EN}, błąd: {error(queueSystem.ExpectedEN, simulator.GlobalStats.EN)}");
-                Console.WriteLine($"EW: oczekiwane: {queueSystem.ExpectedEW}, doświadczalne: {simulator.GlobalStats.EW}, błąd: {error(queueSystem.ExpectedEW, simulator.GlobalStats.EW)}");
-                Console.WriteLine($"EQ: oczekiwane: {queueSystem.ExpectedEQ}, doświadczalne: {simulator.GlobalStats.EQ}, błąd: {error(queueSystem.ExpectedEQ, simulator.GlobalStats.EQ)}");
-                Console.WriteLine();
-            }
-
+            assignemnet.Run();
         }
 
-        double error(double expected, double real)
-        {
-            return Math.Abs(expected - real) / expected;
-        }
+
     }
 }

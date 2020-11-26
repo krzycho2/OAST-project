@@ -55,7 +55,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Assignment.cs" />
     <Compile Include="Client.cs" />
+    <Compile Include="Mm1Continuous.cs" />
+    <Compile Include="QOutputParam.cs" />
     <Compile Include="QEvent.cs" />
     <Compile Include="EventPool.cs" />
     <Compile Include="QEventType.cs" />
