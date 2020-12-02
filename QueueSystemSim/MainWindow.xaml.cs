@@ -31,11 +31,5 @@ namespace QueueSystemSim
             assignemnet.Run();
         }
 
-        private void test()
-        {
-
-        }
-
-
     }
 }

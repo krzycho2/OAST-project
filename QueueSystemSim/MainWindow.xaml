@@ -5,45 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QueueSystemSim"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="OAST Projekt 1" Height="150" Width="400">
     <Grid Background="#FF1F1D1D" >
 
-        <StackPanel Orientation="Vertical" Margin="30">
-            <StackPanel Orientation="Vertical" VerticalAlignment="Top" Background="#FF716A6A">
-                <CheckBox Margin="0,5,0,5" Background="#FF7D7676" Foreground="#FFD1CCCC" BorderBrush="#FFD1CCCC" Name="C1">
-                    1.1 Dla zwykłej kolejki M/M/1 porównać E[T] z wynikami teoretycznymi dla Ro = [0.25, 0.5, 0,75].
-                </CheckBox>
+        <TextBlock Foreground="#FFEAE1E1" Margin="10" HorizontalAlignment="Center" TextAlignment="Center">
+            Witamy w symulatorze kolejek M/M/1.
+            <LineBreak/>
 
-                <CheckBox Margin="0,5,0,5"  Name="C2">
-                    Dla zwykłej kolejki M/M/1, narysować wykres zbieżności prawdopodobieństwa p0(t) do wartości p0 z rozkładu stacjonarnego.
-                </CheckBox>
-
-                <CheckBox Margin="0,5,0,5"  Name="C3">
-                    2.1 Dla kolejki M/M/1 o pracy ciągłej, porównać E[Q], E[T], E[N], E[W] z wynikami teoretycznymi.
-                </CheckBox>
-
-                <CheckBox Margin="0,5,0,5"  Name="C4"> 
-                    2.2 Dla kolejki M/M/1 o pracy ciągłej, zbadać jak zmienią się parametry E[Q], E[T], E[N], E[W], jeśli czas obsługi będzie stały i równy średniemu czasowi obsługi dla klientów prawdziwych.
-                </CheckBox>
-
-                <CheckBox Margin="0,5,0,5"  Name="C5">
-                    2.3 Dla kolejki M/M/1 o pracy ciągłej, oszacować prawdopodobieństwo, że serwer jest zajęty obsługą klienta wyimaginowanego.
-                </CheckBox>
-
-            </StackPanel>
-            <StackPanel Orientation="Vertical" VerticalAlignment="Bottom" Margin="0,150,0,0">
-                <CheckBox Margin="0,20,0,20" Content="Zapis wyników do pliku tekstowego (Ścieżka: Desktop/oast.txt)" Name="C6"/>
-
-                <Button Width="100" Content="Start" Click="OnStart"/>
-            </StackPanel>
-
-
-        </StackPanel>
-        
-           
-
-        
-
+            Aby rozpocząć symulację wciśnij START.
+        </TextBlock>
+        <Button  Content="Start" Click="OnStart" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20" Width="100" Background="#FFEAE1E1"/>
 
     </Grid>
     
