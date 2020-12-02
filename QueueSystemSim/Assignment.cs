@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace QueueSystemSim
 {
@@ -13,8 +14,8 @@ namespace QueueSystemSim
         public void Run()
         {
             Task1();
-            Task2();
-            Task3();
+            //Task2();
+            //Task3();
         }
 
         /// <summary>
@@ -24,8 +25,9 @@ namespace QueueSystemSim
         {
             double[] roValues = new double[] { 0.25, 0.5, 0.75 };
             double paramLambda = 4;
-
-            var paramET = new QOutputParam { Name = "ET" };
+            var outputParams = new QOutputParams();
+            var p0Points = new List< List<Point> >();
+            var expectedP0Values = new List<double>();
 
             for (int i = 0; i < roValues.Length; i++)
             {
@@ -37,63 +39,82 @@ namespace QueueSystemSim
                 var simulator = new MultiSimulator(queueSystem);
                 simulator.RunSim();
 
-                paramET.Values.Add(new QOutputParamValue { Ro = paramRo, Expected = queueSystem.ExpectedET, Value = simulator.GlobalStats.ET });  
+                outputParams.AddEntry(simulator.OutputParams);
+                p0Points.Add(simulator.EventSimulator.P0Points);
+                expectedP0Values.Add(simulator.EventSimulator.QueueSystem.ExpectedP0);
             }
 
             string output = Task1Intro;
-            output += PrettyPrint2(new List<QOutputParam> { paramET });
+            output += PrettyPrint(outputParams);
+
+            SaveP0Points(p0Points);
+            output += "\n\nPunkty wykresów zbieżności P0 zapisano w pliku 'p0data.txt' na Pulpicie";
 
             Console.Write(output);
             AllOutput += output;
 
-            // draw 3 graphs
         }
 
+        public void SaveP0Points(List<List<Point>> pointsPerRo)
+        {
+            double paramLambda = 4;
+            double[] roValues = new double[] { 0.25, 0.5, 0.75 };
+            string output = "";
+            for (int i = 0; i < pointsPerRo.Count; i++)
+            {
+                var points = pointsPerRo[i];
+                double ro = roValues[i];
+                double paramMi = paramLambda / ro;
+
+                output += $"Wartości_dla_Ro_{ro}. Oczekiwane_p0_{1 - ro}\n";
+                output += string.Join("\n", points.Select(point => $"{point.X} {point.Y}"));
+                output += "\n\n";
+            }
+
+
+            string path = $@"{ Environment.GetFolderPath(Environment.SpecialFolder.Desktop)}\p0data.txt";
+            using (var file = new System.IO.StreamWriter(path))
+            {
+                file.Write(output);
+            }
+
+        }
 
         public void Task2()
         {
-            var ET = new QOutputParam { Name = "ET" };
-            var EW = new QOutputParam { Name = "EW" };
-            var EN = new QOutputParam { Name = "EN" };
-            var EQ = new QOutputParam { Name = "EQ" };
-            var outputParams = new List<QOutputParam> { ET, EW, EN, EQ };
+
+            var outputParams = new QOutputParams();
 
             double[] roValues = new double[] { 0.25, 0.5, 0.75 };
             double paramLambda = 4;
+            double[] imgClientsProbas = new double[3];
 
             for (int i = 0; i < roValues.Length; i++)
             {
                 double paramRo = roValues[i];
                 double paramMi = paramLambda / paramRo;
-
                 var queueSystem = new Mm1Continuous(paramMi, paramLambda);
-
                 var simulator = new MultiSimulator(queueSystem);
                 simulator.RunSim();
 
-                foreach (var paramName in new string[] { "ET", "EW", "EN", "EQ" })
-                {
-                    outputParams.Find(param => param.Name == paramName).
-                    Values.Add(new QOutputParamValue { Ro = paramRo, Expected = queueSystem.ExpectedET, Value = simulator.GlobalStats.ET });
-                }
+                outputParams.AddEntry(simulator.OutputParams);
+                imgClientsProbas[i] = simulator.ImgClientServicedProbability;
             }
 
             string output = Task2Intro;
-            output += PrettyPrint2(outputParams);
+            output += PrettyPrint(outputParams);
+            output += PrettyPrintImgClientProbability(roValues, imgClientsProbas);
             Console.Write(output);
             AllOutput += output;
         }
 
         public void Task3()
         {
-            var ET = new QOutputParam { Name = "ET" };
-            var EW = new QOutputParam { Name = "EW" };
-            var EN = new QOutputParam { Name = "EN" };
-            var EQ = new QOutputParam { Name = "EQ" };
-            var outputParams = new List<QOutputParam> { ET, EW, EN, EQ };
-
+            var outputParams = new QOutputParams();
             double[] roValues = new double[] { 0.25, 0.5, 0.75 };
             double paramLambda = 4;
+
+            double[] imgClientsProbas = new double[3];
 
             for (int i = 0; i < roValues.Length; i++)
             {
@@ -106,67 +127,69 @@ namespace QueueSystemSim
 
                 simulator.RunSim();
 
-                foreach (var paramName in new string[] { "ET", "EW", "EN", "EQ" })
-                {
-                    outputParams.Find(param => param.Name == paramName).
-                    Values.Add(new QOutputParamValue { Ro = paramRo, Expected = queueSystem.ExpectedET, Value = simulator.GlobalStats.ET });
-                }
+                outputParams.AddEntry(simulator.OutputParams);
+                imgClientsProbas[i] = simulator.ImgClientServicedProbability;
             }
 
             string output = Task3Intro;
-            output += PrettyPrint2(outputParams);
+            output += PrettyPrint(outputParams);
+            output += PrettyPrintImgClientProbability(roValues, imgClientsProbas);
             Console.Write(output);
             AllOutput += output;
         }
 
-        private string PrettyPrint2(List<QOutputParam> outputParams)
+        private string PrettyPrint(QOutputParams outputParams)
         {
-            double[] roValues = outputParams[0].RoValues;
+            double[] roValues = outputParams.RoValues;
             string output = "";
-            output += ("\t\t\t\t\t\t   Ro\n");
-            output += ($"\t\t\t\t| {roValues[0]:0.00}\t | {roValues[1]:0.00}\t  | {roValues[2]:0.00}   |\n");
-            output += ("\t\t\t\t----------------------------\n");
+            output += ("\t\t\t\t\t   Ro\n");
+            output += ($"\t\t\t| {roValues[0]:0.00}\t | {roValues[1]:0.00}\t  | {roValues[2]:0.00}   |\n");
+            output += ("\t\t\t----------------------------\n");
 
-            foreach (var oParam in outputParams)
+            foreach (var oParam in outputParams.AllParams)
             {
                 var expecteds = oParam.Values.Select((param) => param.sExpected).ToList();
                 var values = oParam.Values.Select((param) => param.sValue).ToList();
+                var errors = oParam.Values.Select((param) => param.sError).ToList();
 
                 string expectedString = "\tOczekiwane\t|";
                 string valuesString = "\tUzyskane\t|";
+                string errorsString  = "\tBład wzg.\t|";
 
                 for (int i = 0; i < roValues.Length; i++)
                 {
                     expectedString += $" {expecteds[i]} |";
                     valuesString += $" {values[i]} |";
+                    errorsString += $" {errors[i]}   |";
                 }
 
                 expectedString += $"\n";
                 valuesString += $"\n";
+                errorsString += $"\n";
 
                 output += ($"{oParam.Name}\t\t\t\t\n");
                 output += expectedString;
                 output += valuesString;
-                output += ("\t\t\t\t----------------------------\n");
+                output += errorsString;
+                output += ("\t\t\t----------------------------\n");
             }
 
             return output;
         }
 
+        private string PrettyPrintImgClientProbability(double[] roValues, double[] probas)
+        {
+            string output = "\n";
+            output += "Prawdopodobieństwo, że serwer jest zajęty obsługą klienta wyimaginowanego:\n\n";
+            output += ($"Ro\t| {roValues[0]:0.00}  | {roValues[1]:0.00}  | {roValues[2]:0.00}  |\n");
+            output += ("\t----------------------------\n");
+
+            output += $"P\t| {probas[0]:0.0%}\t| {probas[1]:0.0%}\t| {probas[2]:0.0%}\t|\n";
+
+            return output;
+        }
+
         
-
-        /// <summary>
-        /// 2.3 Dla kolejki M/M/1 o pracy ciągłej, oszacować prawdopodobieństwo, że serwer jest zajęty obsługą klienta wyimaginowanego.
-        /// </summary>
-        public void Task2_3()
-        {
-            Console.WriteLine("2.3");
-        }
-
-        public void WriteOutputToFile()
-        {
-            Console.WriteLine("Zapis do pliku");
-        }
 
         public string Task1Intro
         {

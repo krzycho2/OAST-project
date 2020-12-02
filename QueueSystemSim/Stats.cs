@@ -10,11 +10,12 @@ namespace QueueSystemSim
     {
         private double waitForServiceIntervalSum = 0.0;
         private double servicePassIntervalSum = 0.0;
+        private double imgClientIntervalSum = 0.0;
         private double nClientsWaitingSum = 0;
         private double nClientsInSystemSum = 0;
-
-
+        
         public int nMeasurements { get; private set; } = 0;
+        public double FullServiceTime { get; set; } = 0.0;
 
         // Średnia liczba klientów w systemie
         public double EN
@@ -40,14 +41,23 @@ namespace QueueSystemSim
             get => nClientsWaitingSum / nMeasurements;
         }
 
+        public double ImgClientServicedProbability { get => imgClientIntervalSum / FullServiceTime; }
+
         public void AddEntry(double waitInterval=0, double systemPassInterval=0, double nClientsInSystem=0, double nClientsWaiting=0)
         { 
-            nClientsInSystemSum += nClientsInSystem;
             servicePassIntervalSum += systemPassInterval;
             waitForServiceIntervalSum += waitInterval;
+
             nClientsWaitingSum += nClientsWaiting;
+            nClientsInSystemSum += nClientsInSystem;
 
             nMeasurements++;
+        }
+
+        public void AddImgClientService(double actualTime, double imgClientInterval)
+        {
+            FullServiceTime = actualTime;
+            imgClientIntervalSum += imgClientInterval;
         }
 
         public void Reset()
@@ -56,8 +66,10 @@ namespace QueueSystemSim
             nClientsInSystemSum = 0.0;
             servicePassIntervalSum = 0.0;
             nClientsWaitingSum = 0.0;
+            imgClientIntervalSum = 0.0;
 
             nMeasurements = 0;
+            FullServiceTime = 0;
         }
 
     }

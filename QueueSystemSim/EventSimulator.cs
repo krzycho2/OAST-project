@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace QueueSystemSim
 {
@@ -19,6 +20,8 @@ namespace QueueSystemSim
         public int nSteps { get; set; }
         public double SimStopByET { get => 1e-7 * QueueSystem.LeaveParamMi; }
 
+        public List<Point> P0Points { get; set; } = new List<Point>();
+
         public double EN { get => CalculateEN(); }
         public double EQ { get => CalculateEQ(); }
         public double ET { get => QueueSystem.TimeStats.ET; }
@@ -34,12 +37,14 @@ namespace QueueSystemSim
             Init();
             Warmup();
             ActualSim();
+            
         }
 
         public void Init() 
         {
             QueueSystem.InitQueue(nInitClients);
             InitEpisodes();
+            P0Points = new List<Point>();
         }
 
         public void Warmup() 
@@ -80,6 +85,7 @@ namespace QueueSystemSim
         private void CollectResults()
         {
             EventPool.AddOldEvents(QueueSystem.LastEvents);
+            P0Points.Add(new Point { X = QueueSystem.ActualTime, Y = QueueSystem.NoClientsInterval / QueueSystem.ActualTime });
         }
 
         private void AddEventToQueue()

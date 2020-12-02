@@ -17,13 +17,16 @@ namespace QueueSystemSim
         public double QueueParamRo { get => ArrivalParamLambda / LeaveParamMi; }
         
         public List<Client> Clients { get; protected set; } = new List<Client>();
-        public Stats TimeStats { get; private set; } = new Stats();
-        public List<QEvent> LastEvents { get; private set; } = new List<QEvent>();
+        public Stats TimeStats { get; protected set; } = new Stats();
+        public List<QEvent> LastEvents { get; protected set; } = new List<QEvent>();
 
         public virtual double ExpectedEQ { get => Math.Pow(QueueParamRo, 2.0) / (1 - QueueParamRo); }
         public virtual double ExpectedEN { get => QueueParamRo / (1 - QueueParamRo); }
         public virtual double ExpectedEW { get => QueueParamRo / (LeaveParamMi - ArrivalParamLambda); }
         public virtual double ExpectedET { get => 1 / (LeaveParamMi - ArrivalParamLambda); }
+        public double ExpectedP0 { get => 1 - QueueParamRo; }
+
+        public double NoClientsInterval { get; set; } = 0.0;
 
         public int nClientsInSystem
         {
@@ -68,7 +71,8 @@ namespace QueueSystemSim
         {
             while (nClientsWaiting == 0)
             {
-                ActualTime = CurrentClient.Arrival.Time; // Skip timebv 
+                NoClientsInterval += CurrentClient.Arrival.Time - ActualTime;
+                ActualTime = CurrentClient.Arrival.Time; // Skip time
             }
 
             double serviceInterval = CalculateServiceInterval();
@@ -105,9 +109,10 @@ namespace QueueSystemSim
                 AddClient( new Client(time) );
             }
             ActualTime = CurrentClient.Arrival.Time;
+            NoClientsInterval = 0.0;
         }
         
-        public void CollectResults()
+        protected virtual void CollectResults()
         {
             LastEvents = CurrentClient.AllEvents;
             TimeStats.AddEntry(CurrentClient.WaitInterval, CurrentClient.SystemPassInterval);

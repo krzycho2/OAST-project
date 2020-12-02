@@ -11,16 +11,6 @@ namespace QueueSystemSim
     {
         private readonly RNGCryptoServiceProvider RNG = new RNGCryptoServiceProvider();
 
-        public double RandomDouble
-        {
-            get
-            {
-                byte[] random = new byte[1];
-                RNG.GetBytes(random);
-                return random[0] / 255.0; // normalization to 1
-            }
-        }
-
         public double CreateNumber(double param)
         {
             double value;
@@ -34,6 +24,15 @@ namespace QueueSystemSim
             return value;
         }
 
+        public double RandomDouble
+        {
+            get
+            {
+                byte[] random = new byte[1];
+                RNG.GetBytes(random);
+                return random[0] / 255.0; // normalization to 1
+            }
+        }
 
         ~ExpDistribution()
         {

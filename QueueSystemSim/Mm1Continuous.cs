@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace QueueSystemSim
 {
-    class Mm1Continuous : Mm1QueueSystem
+    public class Mm1Continuous : Mm1QueueSystem
     {
         public bool IsFixedServiceInterval { get; set; } = false;
         // Expected values
@@ -14,6 +14,9 @@ namespace QueueSystemSim
         public override double ExpectedEN { get => (2 - QueueParamRo) * QueueParamRo / (1 - QueueParamRo); }
         public override double ExpectedEW { get => QueueParamRo / ArrivalParamLambda / (1 - QueueParamRo); }
         public override double ExpectedET { get => (2 - QueueParamRo) * QueueParamRo / ArrivalParamLambda / (1 - QueueParamRo); }
+
+        public double ImgClientServiceInterval { get; private set; }
+        
 
         public Mm1Continuous(double paramMi, double paramLambda) : base(paramMi, paramLambda) { }
 
@@ -28,6 +31,17 @@ namespace QueueSystemSim
             ServiceClient(serviceInterval);
         }
 
+        private void ServiceImaginaryClient()
+        {
+            var imClient = new Client(ActualTime, ActualTime);
+            double serviceInterval = expDistribution.CreateNumber(LeaveParamMi);
+            imClient.Leave.Time = imClient.ServiceStart.Time + serviceInterval; // Unnessary, just to show logic
+
+            ActualTime = imClient.Leave.Time;
+            ImgClientServiceInterval = serviceInterval;
+            TimeStats.AddImgClientService(ActualTime, ImgClientServiceInterval);
+        }
+
         protected override double CalculateServiceInterval()
         {
             if (IsFixedServiceInterval)
@@ -37,14 +51,11 @@ namespace QueueSystemSim
                 return expDistribution.CreateNumber(LeaveParamMi);
         }
 
-
-        private void ServiceImaginaryClient()
+        protected override void CollectResults()
         {
-            var imClient = new Client(ActualTime, ActualTime);
-            double serviceInterval = expDistribution.CreateNumber(LeaveParamMi);
-            imClient.Leave.Time = imClient.ServiceStart.Time + serviceInterval; // Unnessary, just to show logic
-
-            ActualTime = imClient.Leave.Time;
+            LastEvents = CurrentClient.AllEvents;
+            TimeStats.AddEntry(CurrentClient.WaitInterval, CurrentClient.SystemPassInterval);
         }
+
     }
 }
